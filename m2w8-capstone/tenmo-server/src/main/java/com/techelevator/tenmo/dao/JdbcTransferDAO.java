@@ -82,6 +82,7 @@ private JdbcTemplate jdbcTemplate;
 		
 		transfer.setTransferId(results.getInt("transfer_id"));
 		transfer.setTransferTypeId(results.getInt("transfer_type_id"));
+		transfer.setAmount(results.getDouble("amount"));
 		
 		
 		return transfer;

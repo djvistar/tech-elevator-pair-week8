@@ -29,7 +29,7 @@ public class JdbcAccountDAO implements AccountDAO{
 		}
 		
 		
-		return 0;
+		return currentBalance;
 	}
 
 }
