@@ -2,7 +2,7 @@ package com.techelevator.tenmo.dao;
 
 public interface AccountDAO {
 
-	public double retrieveBalance(long accountId);
+	public double retrieveBalance(String username);
 	
 	
 }

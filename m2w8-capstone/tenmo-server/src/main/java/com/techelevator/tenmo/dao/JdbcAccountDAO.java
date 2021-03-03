@@ -4,7 +4,12 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
+import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.User;
+ 
+@Component
 public class JdbcAccountDAO implements AccountDAO{
 
 	private JdbcTemplate jdbcTemplate;
@@ -16,20 +21,52 @@ public class JdbcAccountDAO implements AccountDAO{
 	
 	
 	@Override
-	public double retrieveBalance(long accountId) {
+	public double retrieveBalance(String username) {
 		// TODO Auto-generated method stub
-		double currentBalance = 0;
-		String sql = "SELECT balance FROM accounts"+
-		             "WHERE user_id = ?";
-
-		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, accountId);
 		
-		if (results.next()) {
-			currentBalance = results.getDouble("balance");
-		}
+		String sqlSelect = "SELECT user_id, username, password_hash FROM users WHERE username = ?;";
+		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
+		
+		usernameResult.next();
+		
+		User user = mapToUser(usernameResult);
+		long userId = user.getId();
+
+		double currentBalance = 0;
+		String sql = "SELECT balance FROM accounts " +
+		             "WHERE user_id = ?;";
+
+		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
+		
+		results.next(); 
+		currentBalance = results.getDouble("balance");
 		
 		
 		return currentBalance;
 	}
+	
+//	private Account mapToAccount(SqlRowSet results) {
+//		Account account = new Account();
+//		
+//		account.setAccountBalance(results.getDouble("balance"));
+//		account.setAccountId(results.getLong("account_id"));
+//		
+//		
+//		
+//		return account;
+//		
+//	}
+	
+	private User mapToUser(SqlRowSet results) {
+		User user = new User();
+		
+		user.setId(results.getLong("user_id"));
+		user.setUsername(results.getString("username"));
+		user.setPassword(results.getString("password_hash"));
+		
+		return user;
+	}
+	
+	
 
 }

@@ -9,7 +9,7 @@ public interface TransferDAO {
 	//public void sendFunds(long userId, double amount);
 	
 	void addFundsToReceiverAccount(long receiverId, double amountSent);
-	void removeFundsFromSenderAccount(long senderId, double amountSent);
+	void removeFundsFromSenderAccount(String username, double amountSent);
 	
 	List<Transfer> listOfAllTransfers();
 	

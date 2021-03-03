@@ -7,11 +7,13 @@ import javax.sql.DataSource;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.User;
 
+@Component
 public class JdbcTransferDAO implements TransferDAO {
 
 private JdbcTemplate jdbcTemplate;
@@ -30,12 +32,15 @@ private JdbcTemplate jdbcTemplate;
 	}
 
 	@Override
-	public void removeFundsFromSenderAccount(long senderId, double amountSent) {
+	public void removeFundsFromSenderAccount(String username, double amountSent) {
 		// TODO Auto-generated method stub
 
+		String sqlSelect = "SELECT user_id FROM users WHERE username = ?";
+		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
+		int senderId = usernameResult.getInt("user_id");
 		
-		String sql = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?";
-		jdbcTemplate.update(sql, amountSent, senderId);
+		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?";
+		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
 	}
 
 	@Override
@@ -44,9 +49,8 @@ private JdbcTemplate jdbcTemplate;
 		
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
 		
-		String sql = "SELECT transfers.transfer_id, type.transfer_type_desc, users.username, transfers.amount " + 
-					 "FROM transfers " +
-					 "JOIN transfer_types type ON type.transfer_type_id = transfers.transfer_type_id " + 
+		String sql = "SELECT transfers.transfer_id, users.username, transfers.amount " + 
+					 "FROM transfers " + 
 					 "JOIN accounts ON account.account_from = transfers.account_from " +
 					 "JOIN users ON users.user_id = accounts.user_id";
 		
@@ -58,23 +62,6 @@ private JdbcTemplate jdbcTemplate;
 		
 		return null;
 	}
-	
-//	@Override
-//	public void sendFunds(long userId, double amount) {
-//		// TODO Auto-generated method stub
-//
-//		User receiver = new User();
-//		
-//		if (receiver.getId() == userId) {
-//			
-//			String sql = "";
-//			
-//		}
-//		
-//		
-//		
-//		
-//	}
 	
 	private Transfer mapToTransfer(SqlRowSet results) {
 		
