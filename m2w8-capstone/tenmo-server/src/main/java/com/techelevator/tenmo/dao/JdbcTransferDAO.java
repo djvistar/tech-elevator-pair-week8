@@ -26,7 +26,7 @@ private JdbcTemplate jdbcTemplate;
 	public void addFundsToReceiverAccount(long receiverId, double amountSent) {
 		// TODO Auto-generated method stub
 		
-		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?";
+		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
 		jdbcTemplate.update(sql, amountSent, receiverId);
 		
 	}
@@ -35,11 +35,11 @@ private JdbcTemplate jdbcTemplate;
 	public void removeFundsFromSenderAccount(String username, double amountSent) {
 		// TODO Auto-generated method stub
 
-		String sqlSelect = "SELECT user_id FROM users WHERE username = ?";
+		String sqlSelect = "SELECT user_id FROM users WHERE username = ?;";
 		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
 		int senderId = usernameResult.getInt("user_id");
 		
-		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?";
+		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
 		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
 	}
 
@@ -52,7 +52,7 @@ private JdbcTemplate jdbcTemplate;
 		String sql = "SELECT transfers.transfer_id, users.username, transfers.amount " + 
 					 "FROM transfers " + 
 					 "JOIN accounts ON account.account_from = transfers.account_from " +
-					 "JOIN users ON users.user_id = accounts.user_id";
+					 "JOIN users ON users.user_id = accounts.user_id;";
 		
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
 		
@@ -70,7 +70,6 @@ private JdbcTemplate jdbcTemplate;
 		transfer.setTransferId(results.getInt("transfer_id"));
 		transfer.setTransferTypeId(results.getInt("transfer_type_id"));
 		transfer.setAmount(results.getDouble("amount"));
-		
 		
 		return transfer;
 	}
