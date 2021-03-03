@@ -32,7 +32,7 @@ public class TransferController {
 	}
 	
 	@RequestMapping( path = "/accounts/{userId}", method = RequestMethod.PUT)
-	public void receiveFunds(@PathVariable int userId, double amountToTransfer, Principal principal) {
+	public void transferFunds(@PathVariable int userId, double amountToTransfer, Principal principal) {
 		transferDao.addFundsToReceiverAccount(userId, amountToTransfer);
 		//transferDao.removeFundsFromSenderAccount(principal, amountToTransfer);
 	}
