@@ -9,10 +9,10 @@ public class Transfer {
 	private int accountFrom;
 	private int accountTo;
 	
-	public Transfer(int accountTo, double amount) {
-		this.accountTo = accountTo;
-		this.amount = amount;
-	}
+//	public Transfer() {
+//		this.accountTo = accountTo;
+//		this.amount = amount;
+//	}
 	
 	public int getTransferId() {
 		return transferId;
