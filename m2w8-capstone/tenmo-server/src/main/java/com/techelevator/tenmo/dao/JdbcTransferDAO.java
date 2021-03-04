@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,9 @@ import com.techelevator.tenmo.model.User;
 
 @Component
 public class JdbcTransferDAO implements TransferDAO {
+	
+	@Autowired
+	private AccountDAO accountDAO;
 
 private JdbcTemplate jdbcTemplate;
 	
@@ -49,10 +53,17 @@ private JdbcTemplate jdbcTemplate;
 		
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
 		
-		String sql = "SELECT transfers.* " + 
-					 "FROM transfers " + 
-					 "JOIN accounts ON accounts.account_id = transfers.account_from " +
-					 "JOIN users ON users.user_id = accounts.user_id;";
+//		String sql = "SELECT transfers.* " + 
+//					 "FROM transfers " + 
+//					 "JOIN accounts ON accounts.account_id = transfers.account_from " +
+//					 "JOIN users ON users.user_id = accounts.user_id;";
+		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo "+
+				"FROM transfers t " + 
+				"JOIN accounts a ON t.account_from = a.account_id " + 
+				"JOIN accounts b ON t.account_to = b.account_id " + 
+				"JOIN users u ON a.user_id = u.user_id " + 
+				"JOIN users v ON b.user_id = v.user_id " ; 
+//				"WHERE a.user_id = ? OR b.user_id = ? ";
 					 
 		
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
@@ -74,15 +85,14 @@ private JdbcTemplate jdbcTemplate;
 //					 "OR accounts.account_id = transfers.account_to " + 
 //					 "JOIN users ON users.user_id = accounts.user_id " + 
 //					 "WHERE transfer_id = ?;";
-		String sql = "SELECT t.transfer_id, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc, t.amount "+
-                     "FROM transfers t "+
-				"JOIN accounts a ON t.account_from = a.account_id "+
-				"JOIN accounts b ON t.account_to = b.account_id "+
-				"JOIN users u ON a.user_id = u.user_id "+
-				"JOIN users v ON b.user_id = v.user_id "+
-				"JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id "+
-				"JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id "+
-				"WHERE t.transfer_id = ? ";
+		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc FROM transfers t " + 
+				"JOIN accounts a ON t.account_from = a.account_id " + 
+				"JOIN accounts b ON t.account_to = b.account_id " + 
+				"JOIN users u ON a.user_id = u.user_id " + 
+				"JOIN users v ON b.user_id = v.user_id " + 
+				"JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id " + 
+				"JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id " + 
+				"WHERE t.transfer_id = ?";
 		
 		SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
 		
@@ -92,6 +102,35 @@ private JdbcTemplate jdbcTemplate;
 		return singleTransfer;
 		
 	}
+	
+	@Override
+	public String sendTransfer(int userFrom, int userTo, double amount) {
+		// TODO Auto-generated method stub
+		Account account = new Account();
+		if (userFrom == userTo) {
+			return "You can not send money to your self.";
+		}
+		else if (account.getAccountBalance() < amount || account.getAccountBalance()< 0 ) {
+			return "Insufficient Funds";
+	
+		}
+		else {
+			String sql = "INSERT INTO transfers(transfer_id,transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
+		                  "VALUES (?,2,2,?,?,?) ";
+		jdbcTemplate.update(sql, userFrom, userTo, amount);
+//		long receiverId, double amountSent 
+//			// TODO Auto-generated method stub
+//			
+//			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
+//			jdbcTemplate.update(sql, amountSent, receiverId);
+//			
+//		}
+//		
+		}
+		
+		return "Transfer Complete";
+		}
+
 	
 	private Transfer mapToTransfer(SqlRowSet results) {
 		
@@ -115,6 +154,8 @@ private JdbcTemplate jdbcTemplate;
 		
 		return transfer;
 	}
+
+
 	
 	
 

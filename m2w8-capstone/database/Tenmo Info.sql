@@ -2,7 +2,7 @@ UPDATE accounts
 SET balance = 5000
 WHERE user_id = 1002;
 
-SELECT user_id FROM users WHERE username = 'casey';
+SELECT user_id FROM users WHERE username = 'victor';
 SELECT balance FROM accounts WHERE user_id = 1001;
 
 SELECT * FROM accounts;
@@ -38,4 +38,6 @@ JOIN users u ON a.user_id = u.user_id
 JOIN users v ON b.user_id = v.user_id
 JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id
 JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id 
-WHERE t.transfer_id = ?;
+WHERE t.transfer_id = 5000;
+
+ROLLBACK;

@@ -12,5 +12,7 @@ public interface TransferDAO {
 	void removeFundsFromSenderAccount(String username, double amountSent);
 	
 	List<Transfer> listOfAllTransfers();
+	 Transfer listTransferDetails(int transferId);
+	 public String sendTransfer(int userFrom, int userTo, double amount);
 	
 }
