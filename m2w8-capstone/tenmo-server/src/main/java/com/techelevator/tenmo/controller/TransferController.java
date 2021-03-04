@@ -15,6 +15,7 @@ import com.techelevator.tenmo.dao.JdbcAccountDAO;
 import com.techelevator.tenmo.dao.JdbcTransferDAO;
 import com.techelevator.tenmo.dao.TransferDAO;
 import com.techelevator.tenmo.model.Account;
+import com.techelevator.tenmo.model.Transfer;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -38,6 +39,11 @@ public class TransferController {
 	public void transferFunds(@RequestBody int userId, double amountToTransfer, Principal principal) {
 		transferDao.addFundsToReceiverAccount(userId, amountToTransfer);
 		transferDao.removeFundsFromSenderAccount(principal.getName(), amountToTransfer);
+	}
+	
+	@RequestMapping( path = "transfers", method = RequestMethod.GET )
+	public List<Transfer> listAllTransfers() {
+		return transferDao.listOfAllTransfers();
 	}
 	
 }

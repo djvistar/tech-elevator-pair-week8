@@ -51,16 +51,17 @@ private JdbcTemplate jdbcTemplate;
 		
 		String sql = "SELECT transfers.transfer_id, users.username, transfers.amount " + 
 					 "FROM transfers " + 
-					 "JOIN accounts ON account.account_from = transfers.account_from " +
+					 "JOIN accounts ON accounts.account_from = transfers.account_from " +
 					 "JOIN users ON users.user_id = accounts.user_id;";
 		
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
 		
 		while (results.next()) {
-			
+			Transfer singleTransfer = mapToTransfer(results);
+			allTransfers.add(singleTransfer);
 		}
 		
-		return null;
+		return allTransfers;
 	}
 	
 	private Transfer mapToTransfer(SqlRowSet results) {
@@ -69,7 +70,10 @@ private JdbcTemplate jdbcTemplate;
 		
 		transfer.setTransferId(results.getInt("transfer_id"));
 		transfer.setTransferTypeId(results.getInt("transfer_type_id"));
+		transfer.setTransferStatusId(results.getInt("transfer_status_id"));
 		transfer.setAmount(results.getDouble("amount"));
+		transfer.setAccountFrom(results.getInt("account_from"));
+		transfer.setAccountTo(results.getInt("account_to"));
 		
 		return transfer;
 	}
