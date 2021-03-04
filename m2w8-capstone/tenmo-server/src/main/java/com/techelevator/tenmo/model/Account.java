@@ -2,7 +2,7 @@ package com.techelevator.tenmo.model;
 
 public class Account {
 
-	private long accountId;
+	private int accountId;
 	private double accountBalance;
 	
 //	public Account() {
@@ -10,11 +10,11 @@ public class Account {
 //		this.accountBalance = accountBalance;
 //	}
 
-	public long getAccountId() {
+	public int getAccountId() {
 		return accountId;
 	}
 
-	public void setAccountId(long accountId) {
+	public void setAccountId(int accountId) {
 		this.accountId = accountId;
 	}
 

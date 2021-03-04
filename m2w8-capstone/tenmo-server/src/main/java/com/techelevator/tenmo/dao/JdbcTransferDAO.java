@@ -49,10 +49,11 @@ private JdbcTemplate jdbcTemplate;
 		
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
 		
-		String sql = "SELECT transfers.transfer_id, users.username, transfers.amount " + 
+		String sql = "SELECT * " + 
 					 "FROM transfers " + 
 					 "JOIN accounts ON accounts.account_from = transfers.account_from " +
 					 "JOIN users ON users.user_id = accounts.user_id;";
+					 
 		
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
 		
@@ -72,10 +73,24 @@ private JdbcTemplate jdbcTemplate;
 		transfer.setTransferTypeId(results.getInt("transfer_type_id"));
 		transfer.setTransferStatusId(results.getInt("transfer_status_id"));
 		transfer.setAmount(results.getDouble("amount"));
-		transfer.setAccountFrom(results.getInt("account_from"));
-		transfer.setAccountTo(results.getInt("account_to"));
+		
+		Account fromAccount = new Account();
+		
+		fromAccount.setAccountId(results.getInt("account_id"));
+		fromAccount.setAccountBalance(results.getDouble("balance"));
+
+		transfer.setAccountFrom(fromAccount.getAccountId());
+		
+		Account toAccount = new Account();
+		
+		toAccount.setAccountId(results.getInt("account_id"));
+		toAccount.setAccountBalance(results.getDouble("balance"));
+		
+		transfer.setAccountTo(toAccount.getAccountId());
 		
 		return transfer;
 	}
+	
+	
 
 }
