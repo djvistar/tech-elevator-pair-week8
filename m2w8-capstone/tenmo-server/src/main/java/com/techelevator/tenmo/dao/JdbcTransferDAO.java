@@ -49,9 +49,9 @@ private JdbcTemplate jdbcTemplate;
 		
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
 		
-		String sql = "SELECT * " + 
+		String sql = "SELECT transfers.* " + 
 					 "FROM transfers " + 
-					 "JOIN accounts ON accounts.account_from = transfers.account_from " +
+					 "JOIN accounts ON accounts.account_id = transfers.account_from " +
 					 "JOIN users ON users.user_id = accounts.user_id;";
 					 
 		
@@ -65,6 +65,25 @@ private JdbcTemplate jdbcTemplate;
 		return allTransfers;
 	}
 	
+	public Transfer listTransferDetails(int transferId) {
+		
+		
+		String sql = "SELECT transfers.* " +
+					 "FROM transfers " +
+					 "JOIN accounts ON accounts.account_id = transfers.account_from " + 
+					 "OR accounts.account_id = transfers.account_to " + 
+					 "JOIN users ON users.user_id = accounts.user_id " + 
+					 "WHERE transfer_id = ?;";
+		
+		SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
+		
+		result.next();
+		Transfer singleTransfer = mapToTransfer(result);
+		
+		return singleTransfer;
+		
+	}
+	
 	private Transfer mapToTransfer(SqlRowSet results) {
 		
 		Transfer transfer = new Transfer();
@@ -72,25 +91,11 @@ private JdbcTemplate jdbcTemplate;
 		transfer.setTransferId(results.getInt("transfer_id"));
 		transfer.setTransferTypeId(results.getInt("transfer_type_id"));
 		transfer.setTransferStatusId(results.getInt("transfer_status_id"));
+		transfer.setAccountFrom(results.getInt("account_from"));
+		transfer.setAccountTo(results.getInt("account_to"));
 		transfer.setAmount(results.getDouble("amount"));
-		
-		Account fromAccount = new Account();
-		
-		fromAccount.setAccountId(results.getInt("account_id"));
-		fromAccount.setAccountBalance(results.getDouble("balance"));
-
-		transfer.setAccountFrom(fromAccount.getAccountId());
-		
-		Account toAccount = new Account();
-		
-		toAccount.setAccountId(results.getInt("account_id"));
-		toAccount.setAccountBalance(results.getDouble("balance"));
-		
-		transfer.setAccountTo(toAccount.getAccountId());
 		
 		return transfer;
 	}
-	
-	
 
 }

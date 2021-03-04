@@ -35,15 +35,20 @@ public class TransferController {
 		return accountDao.retrieveBalance(principal.getName());
 	}
 	
-	@RequestMapping( path = "accounts/{userId}", method = RequestMethod.POST )
-	public void transferFunds(@RequestBody int userId, double amountToTransfer, Principal principal) {
-		transferDao.addFundsToReceiverAccount(userId, amountToTransfer);
+	@RequestMapping( path = "transfers/{recieverId}/{amountToTransfer}", method = RequestMethod.POST )
+	public void transferFunds(@PathVariable int receiverId, @PathVariable double amountToTransfer, Principal principal) {
+		transferDao.addFundsToReceiverAccount(receiverId, amountToTransfer);
 		transferDao.removeFundsFromSenderAccount(principal.getName(), amountToTransfer);
 	}
 	
 	@RequestMapping( path = "transfers", method = RequestMethod.GET )
 	public List<Transfer> listAllTransfers() {
 		return transferDao.listOfAllTransfers();
+	}
+	
+	@RequestMapping( path = "transfers/{transferId}", method = RequestMethod.GET )
+	public Transfer listTransferDetails(@PathVariable int transferId) {
+		return transferDao.listTransferDetails(transferId);
 	}
 	
 }
