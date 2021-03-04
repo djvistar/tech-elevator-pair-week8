@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.TransferRequest;
 import com.techelevator.tenmo.model.User;
 
 @Component
@@ -104,35 +105,38 @@ private JdbcTemplate jdbcTemplate;
 	}
 	
 	@Override
-	public String sendTransfer(Transfer transfer, String username) {
+	public String sendTransfer(TransferRequest transfer, String username, Double amount) {
 		// TODO Auto-generated method stub
-		
-		String sqlSelect = "SELECT * FROM users " +
-						   "JOIN accounts ON accounts.user_id = users.user_id " +
-						   "WHERE username = ?;";
+		try {
+		String sqlSelect = "SELECT accounts.account_id, accounts.balance FROM accounts " +
+						   "JOIN users ON accounts.user_id = users.user_id " +
+						   //"JOIN transfers ON transfers.account_from = accounts.account_id"
+						   "WHERE username LIKE ?;";
 		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
 		
 		usernameResult.next();
-		Account senderAccount = mapRowToAccount(usernameResult);
+		TransferRequest userRequest = mapToRequest(usernameResult);
 		
-		
-		if (senderAccount.getAccountId() == transfer.getAccountTo()) {
+		if (userRequest.getDestinationId() == transfer.getDestinationId()) {
 			return "You can not send money to your self.";
 		}
-		else if (senderAccount.getAccountBalance() < transfer.getAmount() || senderAccount.getAccountBalance()< 0 ) {
+		else if (userRequest.getAmount() < amount || userRequest.getAmount() < 0 ) {
 			return "Insufficient Funds";
 		}
 		else {
 			String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
 		                  "VALUES (2,2,?,?,?) ";
-			jdbcTemplate.update(sql, senderAccount.getAccountId(), transfer.getAccountTo(), transfer.getAmount());
+			jdbcTemplate.update(sql, userRequest.getDestinationId(), transfer.getDestinationId(), amount);
 			
 			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-			jdbcTemplate.update(sqlToAccount, transfer.getAmount(), transfer.getAccountTo());
+			jdbcTemplate.update(sqlToAccount, transfer.getDestinationId(), transfer.getDestinationId());
 			
 			String sqlFromAccount = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
-			jdbcTemplate.update(sqlFromAccount, transfer.getAmount(), senderAccount.getAccountId());
+			jdbcTemplate.update(sqlFromAccount, transfer.getDestinationId(), userRequest.getDestinationId());
 		
+		}
+		} catch (Exception ex) {
+			System.out.println(ex);
 		}
 		
 		return "Transfer Complete";
@@ -162,13 +166,13 @@ private JdbcTemplate jdbcTemplate;
 		return transfer;
 	}
 
-	private Account mapRowToAccount(SqlRowSet results) {
-		Account account = new Account();
+	private TransferRequest mapToRequest(SqlRowSet results) {
+		TransferRequest request = new TransferRequest();
 		
-		account.setAccountId(results.getInt("account_id"));
-		account.setAccountBalance(results.getDouble("balance"));
+		request.setDestinationId(results.getInt("account_id"));
+		request.setAmount(results.getDouble("balance"));
 		
-		return account;
+		return request;
 	}
 	
 	
