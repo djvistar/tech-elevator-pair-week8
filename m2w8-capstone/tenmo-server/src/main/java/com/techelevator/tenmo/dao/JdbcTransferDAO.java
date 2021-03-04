@@ -67,13 +67,22 @@ private JdbcTemplate jdbcTemplate;
 	
 	public Transfer listTransferDetails(int transferId) {
 		
-		
-		String sql = "SELECT transfers.* " +
-					 "FROM transfers " +
-					 "JOIN accounts ON accounts.account_id = transfers.account_from " + 
-					 "OR accounts.account_id = transfers.account_to " + 
-					 "JOIN users ON users.user_id = accounts.user_id " + 
-					 "WHERE transfer_id = ?;";
+//		
+//		String sql = "SELECT transfers.* " +
+//					 "FROM transfers " +
+//					 "JOIN accounts ON accounts.account_id = transfers.account_from " + 
+//					 "OR accounts.account_id = transfers.account_to " + 
+//					 "JOIN users ON users.user_id = accounts.user_id " + 
+//					 "WHERE transfer_id = ?;";
+		String sql = "SELECT t.transfer_id, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc, t.amount "+
+                     "FROM transfers t "+
+				"JOIN accounts a ON t.account_from = a.account_id "+
+				"JOIN accounts b ON t.account_to = b.account_id "+
+				"JOIN users u ON a.user_id = u.user_id "+
+				"JOIN users v ON b.user_id = v.user_id "+
+				"JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id "+
+				"JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id "+
+				"WHERE t.transfer_id = ? ";
 		
 		SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
 		
@@ -94,6 +103,15 @@ private JdbcTemplate jdbcTemplate;
 		transfer.setAccountFrom(results.getInt("account_from"));
 		transfer.setAccountTo(results.getInt("account_to"));
 		transfer.setAmount(results.getDouble("amount"));
+		
+		try {
+			transfer.setUserFrom(results.getString("userFrom"));
+			transfer.setUserTo(results.getString("userTo"));			
+		} catch (Exception e) {}
+		try {
+			transfer.setTransferType(results.getString("transfer_type_desc"));
+			transfer.setTransferStatus(results.getString("transfer_status_desc"));			
+		} catch (Exception e) {}
 		
 		return transfer;
 	}
