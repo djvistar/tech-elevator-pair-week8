@@ -8,11 +8,12 @@ public interface TransferDAO {
 
 	//public void sendFunds(long userId, double amount);
 	
-	void addFundsToReceiverAccount(long receiverId, double amountSent);
-	void removeFundsFromSenderAccount(String username, double amountSent);
+//	void addFundsToReceiverAccount(long receiverId, double amountSent);
+//	void removeFundsFromSenderAccount(String username, double amountSent);
+	
 	
 	List<Transfer> listOfAllTransfers();
 	 Transfer listTransferDetails(int transferId);
-	 public String sendTransfer(int userFrom, int userTo, double amount);
+	 public String sendTransfer(Transfer transfer, String username);
 	
 }

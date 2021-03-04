@@ -26,26 +26,26 @@ private JdbcTemplate jdbcTemplate;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	@Override
-	public void addFundsToReceiverAccount(long receiverId, double amountSent) {
-		// TODO Auto-generated method stub
-		
-		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-		jdbcTemplate.update(sql, amountSent, receiverId);
-		
-	}
-
-	@Override
-	public void removeFundsFromSenderAccount(String username, double amountSent) {
-		// TODO Auto-generated method stub
-
-		String sqlSelect = "SELECT user_id FROM users WHERE username = ?;";
-		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
-		int senderId = usernameResult.getInt("user_id");
-		
-		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
-		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
-	}
+//	@Override
+//	public void addFundsToReceiverAccount(long receiverId, double amountSent) {
+//		// TODO Auto-generated method stub
+//		
+//		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
+//		jdbcTemplate.update(sql, amountSent, receiverId);
+//		
+//	}
+//
+//	@Override
+//	public void removeFundsFromSenderAccount(String username, double amountSent) {
+//		// TODO Auto-generated method stub
+//
+//		String sqlSelect = "SELECT user_id FROM users WHERE username = ?;";
+//		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
+//		int senderId = usernameResult.getInt("user_id");
+//		
+//		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
+//		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
+//	}
 
 	@Override
 	public List<Transfer> listOfAllTransfers() {
@@ -104,28 +104,35 @@ private JdbcTemplate jdbcTemplate;
 	}
 	
 	@Override
-	public String sendTransfer(int userFrom, int userTo, double amount) {
+	public String sendTransfer(Transfer transfer, String username) {
 		// TODO Auto-generated method stub
-		Account account = new Account();
-		if (userFrom == userTo) {
+		
+		String sqlSelect = "SELECT * FROM users " +
+						   "JOIN accounts ON accounts.user_id = users.user_id " +
+						   "WHERE username = ?;";
+		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
+		
+		usernameResult.next();
+		Account senderAccount = mapRowToAccount(usernameResult);
+		
+		
+		if (senderAccount.getAccountId() == transfer.getAccountTo()) {
 			return "You can not send money to your self.";
 		}
-		else if (account.getAccountBalance() < amount || account.getAccountBalance()< 0 ) {
+		else if (senderAccount.getAccountBalance() < transfer.getAmount() || senderAccount.getAccountBalance()< 0 ) {
 			return "Insufficient Funds";
-	
 		}
 		else {
-			String sql = "INSERT INTO transfers(transfer_id,transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
-		                  "VALUES (?,2,2,?,?,?) ";
-		jdbcTemplate.update(sql, userFrom, userTo, amount);
-//		long receiverId, double amountSent 
-//			// TODO Auto-generated method stub
-//			
-//			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-//			jdbcTemplate.update(sql, amountSent, receiverId);
-//			
-//		}
-//		
+			String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
+		                  "VALUES (2,2,?,?,?) ";
+			jdbcTemplate.update(sql, senderAccount.getAccountId(), transfer.getAccountTo(), transfer.getAmount());
+			
+			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
+			jdbcTemplate.update(sqlToAccount, transfer.getAmount(), transfer.getAccountTo());
+			
+			String sqlFromAccount = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
+			jdbcTemplate.update(sqlFromAccount, transfer.getAmount(), senderAccount.getAccountId());
+		
 		}
 		
 		return "Transfer Complete";
@@ -155,7 +162,14 @@ private JdbcTemplate jdbcTemplate;
 		return transfer;
 	}
 
-
+	private Account mapRowToAccount(SqlRowSet results) {
+		Account account = new Account();
+		
+		account.setAccountId(results.getInt("account_id"));
+		account.setAccountBalance(results.getDouble("balance"));
+		
+		return account;
+	}
 	
 	
 
