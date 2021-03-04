@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
+import com.techelevator.tenmo.model.TransferRequest;
 import com.techelevator.tenmo.model.User;
 
 @Component
@@ -26,26 +27,26 @@ private JdbcTemplate jdbcTemplate;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	@Override
-	public void addFundsToReceiverAccount(long receiverId, double amountSent) {
-		// TODO Auto-generated method stub
-		
-		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-		jdbcTemplate.update(sql, amountSent, receiverId);
-		
-	}
-
-	@Override
-	public void removeFundsFromSenderAccount(String username, double amountSent) {
-		// TODO Auto-generated method stub
-
-		String sqlSelect = "SELECT user_id FROM users WHERE username = ?;";
-		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
-		int senderId = usernameResult.getInt("user_id");
-		
-		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
-		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
-	}
+//	@Override
+//	public void addFundsToReceiverAccount(long receiverId, double amountSent) {
+//		// TODO Auto-generated method stub
+//		
+//		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
+//		jdbcTemplate.update(sql, amountSent, receiverId);
+//		
+//	}
+//
+//	@Override
+//	public void removeFundsFromSenderAccount(String username, double amountSent) {
+//		// TODO Auto-generated method stub
+//
+//		String sqlSelect = "SELECT user_id FROM users WHERE username = ?;";
+//		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
+//		int senderId = usernameResult.getInt("user_id");
+//		
+//		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
+//		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
+//	}
 
 	@Override
 	public List<Transfer> listOfAllTransfers() {
@@ -104,28 +105,38 @@ private JdbcTemplate jdbcTemplate;
 	}
 	
 	@Override
-	public String sendTransfer(int userFrom, int userTo, double amount) {
+	public String sendTransfer(TransferRequest transfer, String username, Double amount) {
 		// TODO Auto-generated method stub
-		Account account = new Account();
-		if (userFrom == userTo) {
+		try {
+		String sqlSelect = "SELECT accounts.account_id, accounts.balance FROM accounts " +
+						   "JOIN users ON accounts.user_id = users.user_id " +
+						   //"JOIN transfers ON transfers.account_from = accounts.account_id"
+						   "WHERE username LIKE ?;";
+		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
+		
+		usernameResult.next();
+		TransferRequest userRequest = mapToRequest(usernameResult);
+		
+		if (userRequest.getDestinationId() == transfer.getDestinationId()) {
 			return "You can not send money to your self.";
 		}
-		else if (account.getAccountBalance() < amount || account.getAccountBalance()< 0 ) {
+		else if (userRequest.getAmount() < amount || userRequest.getAmount() < 0 ) {
 			return "Insufficient Funds";
-	
 		}
 		else {
-			String sql = "INSERT INTO transfers(transfer_id,transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
-		                  "VALUES (?,2,2,?,?,?) ";
-		jdbcTemplate.update(sql, userFrom, userTo, amount);
-//		long receiverId, double amountSent 
-//			// TODO Auto-generated method stub
-//			
-//			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-//			jdbcTemplate.update(sql, amountSent, receiverId);
-//			
-//		}
-//		
+			String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
+		                  "VALUES (2,2,?,?,?) ";
+			jdbcTemplate.update(sql, userRequest.getDestinationId(), transfer.getDestinationId(), amount);
+			
+			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
+			jdbcTemplate.update(sqlToAccount, transfer.getDestinationId(), transfer.getDestinationId());
+			
+			String sqlFromAccount = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
+			jdbcTemplate.update(sqlFromAccount, transfer.getDestinationId(), userRequest.getDestinationId());
+		
+		}
+		} catch (Exception ex) {
+			System.out.println(ex);
 		}
 		
 		return "Transfer Complete";
@@ -155,7 +166,14 @@ private JdbcTemplate jdbcTemplate;
 		return transfer;
 	}
 
-
+	private TransferRequest mapToRequest(SqlRowSet results) {
+		TransferRequest request = new TransferRequest();
+		
+		request.setDestinationId(results.getInt("account_id"));
+		request.setAmount(results.getDouble("balance"));
+		
+		return request;
+	}
 	
 	
 
