@@ -40,4 +40,16 @@ JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id
 JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id 
 WHERE t.transfer_id = 5000;
 
+SELECT users.* from users
+join accounts on accounts.user_id = users.user_id;
+
+SELECT accounts.account_id, accounts.balance from accounts
+join users on accounts.user_id = users.user_id;
+
+
+
+
+
+INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) 
+		                  VALUES (2,2,2001,2002,50) ;
 ROLLBACK;
