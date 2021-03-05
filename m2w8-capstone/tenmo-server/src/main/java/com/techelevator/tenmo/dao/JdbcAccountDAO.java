@@ -21,29 +21,18 @@ public class JdbcAccountDAO implements AccountDAO{
 	
 	
 	@Override
-	public double retrieveBalance(String username) {
+	public double retrieveBalance(int id) {
 		// TODO Auto-generated method stub
-		
-		String sqlSelect = "SELECT user_id, username, password_hash FROM users WHERE username = ?;";
-		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
-		
-		usernameResult.next();
-		
-		
-		
-		User user = mapToUser(usernameResult);
-		long userId = user.getId();
 
 		double currentBalance = 0;
 		String sql = "SELECT balance FROM accounts " +
 		             "WHERE user_id = ?;";
 
-		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, userId);
+		SqlRowSet results = jdbcTemplate.queryForRowSet(sql, id);
 		
 		results.next(); 
 		currentBalance = results.getDouble("balance");
-		
-		
+
 		return currentBalance;
 	}
 	
@@ -59,15 +48,15 @@ public class JdbcAccountDAO implements AccountDAO{
 //		
 //	}
 	
-	private User mapToUser(SqlRowSet results) {
-		User user = new User();
-		
-		user.setId(results.getLong("user_id"));
-		user.setUsername(results.getString("username"));
-		user.setPassword(results.getString("password_hash"));
-		
-		return user;
-	}
+//	private User mapToUser(SqlRowSet results) {
+//		User user = new User();
+//		
+//		user.setId(results.getLong("user_id"));
+//		user.setUsername(results.getString("username"));
+//		//user.setPassword(results.getString("password_hash"));
+//		
+//		return user;
+//	}
 	
 	
 

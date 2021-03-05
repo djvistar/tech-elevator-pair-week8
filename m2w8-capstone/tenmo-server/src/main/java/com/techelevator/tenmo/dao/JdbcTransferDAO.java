@@ -17,12 +17,12 @@ import com.techelevator.tenmo.model.User;
 
 @Component
 public class JdbcTransferDAO implements TransferDAO {
-	
+
 	@Autowired
 	private AccountDAO accountDAO;
 
-private JdbcTemplate jdbcTemplate;
-	
+	private JdbcTemplate jdbcTemplate;
+
 	public JdbcTransferDAO(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
@@ -51,34 +51,31 @@ private JdbcTemplate jdbcTemplate;
 	@Override
 	public List<Transfer> listOfAllTransfers() {
 		// TODO Auto-generated method stub
-		
+
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
-		
+
 //		String sql = "SELECT transfers.* " + 
 //					 "FROM transfers " + 
 //					 "JOIN accounts ON accounts.account_id = transfers.account_from " +
 //					 "JOIN users ON users.user_id = accounts.user_id;";
-		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo "+
-				"FROM transfers t " + 
-				"JOIN accounts a ON t.account_from = a.account_id " + 
-				"JOIN accounts b ON t.account_to = b.account_id " + 
-				"JOIN users u ON a.user_id = u.user_id " + 
-				"JOIN users v ON b.user_id = v.user_id " ; 
+		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo " + "FROM transfers t "
+				+ "JOIN accounts a ON t.account_from = a.account_id "
+				+ "JOIN accounts b ON t.account_to = b.account_id " + "JOIN users u ON a.user_id = u.user_id "
+				+ "JOIN users v ON b.user_id = v.user_id ";
 //				"WHERE a.user_id = ? OR b.user_id = ? ";
-					 
-		
+
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
-		
+
 		while (results.next()) {
 			Transfer singleTransfer = mapToTransfer(results);
 			allTransfers.add(singleTransfer);
 		}
-		
+
 		return allTransfers;
 	}
-	
+
 	public Transfer listTransferDetails(int transferId) {
-		
+
 //		
 //		String sql = "SELECT transfers.* " +
 //					 "FROM transfers " +
@@ -86,95 +83,101 @@ private JdbcTemplate jdbcTemplate;
 //					 "OR accounts.account_id = transfers.account_to " + 
 //					 "JOIN users ON users.user_id = accounts.user_id " + 
 //					 "WHERE transfer_id = ?;";
-		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc FROM transfers t " + 
-				"JOIN accounts a ON t.account_from = a.account_id " + 
-				"JOIN accounts b ON t.account_to = b.account_id " + 
-				"JOIN users u ON a.user_id = u.user_id " + 
-				"JOIN users v ON b.user_id = v.user_id " + 
-				"JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id " + 
-				"JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id " + 
-				"WHERE t.transfer_id = ?";
-		
+		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc FROM transfers t "
+				+ "JOIN accounts a ON t.account_from = a.account_id "
+				+ "JOIN accounts b ON t.account_to = b.account_id " + "JOIN users u ON a.user_id = u.user_id "
+				+ "JOIN users v ON b.user_id = v.user_id "
+				+ "JOIN transfer_statuses ts ON t.transfer_status_id = ts.transfer_status_id "
+				+ "JOIN transfer_types tt ON t.transfer_type_id = tt.transfer_type_id " + "WHERE t.transfer_id = ?";
+
 		SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
-		
+
 		result.next();
 		Transfer singleTransfer = mapToTransfer(result);
-		
+
 		return singleTransfer;
-		
+
 	}
-	
+
 	@Override
-	public String sendTransfer(TransferRequest transfer, String username, Double amount) {
+	public String sendTransfer(TransferRequest transferRequest, int senderId) {
 		// TODO Auto-generated method stub
 		try {
-		String sqlSelect = "SELECT accounts.account_id, accounts.balance FROM accounts " +
-						   "JOIN users ON accounts.user_id = users.user_id " +
-						   //"JOIN transfers ON transfers.account_from = accounts.account_id"
-						   "WHERE username LIKE ?;";
-		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
-		
-		usernameResult.next();
-		TransferRequest userRequest = mapToRequest(usernameResult);
-		
-		if (userRequest.getDestinationId() == transfer.getDestinationId()) {
-			return "You can not send money to your self.";
-		}
-		else if (userRequest.getAmount() < amount || userRequest.getAmount() < 0 ) {
-			return "Insufficient Funds";
-		}
-		else {
-			String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "+
-		                  "VALUES (2,2,?,?,?) ";
-			jdbcTemplate.update(sql, userRequest.getDestinationId(), transfer.getDestinationId(), amount);
-			
-			String sqlToAccount = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-			jdbcTemplate.update(sqlToAccount, transfer.getDestinationId(), transfer.getDestinationId());
-			
-			String sqlFromAccount = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
-			jdbcTemplate.update(sqlFromAccount, transfer.getDestinationId(), userRequest.getDestinationId());
-		
-		}
+			String sqlSelect = "SELECT accounts.account_id, accounts.balance FROM accounts "
+					+ "JOIN users ON accounts.user_id = users.user_id " +
+					// "JOIN transfers ON transfers.account_from = accounts.account_id"
+					"WHERE users.user_id = ?;";
+			SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, senderId);
+
+			usernameResult.next();
+			TransferRequest fromAccount = mapToRequest(usernameResult);
+
+			if (fromAccount.getDestinationId() == transferRequest.getDestinationId()) {
+				return "You can not send money to your self.";
+			} // getAmount() is pulling the balance due to the SQL statement above
+			else if (fromAccount.getAmount() < transferRequest.getAmount() || fromAccount.getAmount() < 0) {
+				return "Insufficient Funds";
+			} else if (transferRequest.getAmount() < 0) {
+				return "Cannot send negative funds";
+			} else {
+				String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "
+						+ "VALUES (2,2,?,?,?) ";
+				jdbcTemplate.update(sql, fromAccount.getDestinationId(), transferRequest.getDestinationId(),
+						transferRequest.getAmount());
+
+				// Call the accountDao and get the current balance for the user and add the transfer request and use that amount to update the balance
+				// Don't do math in SQL, Spring doesn't like that
+				
+				double updatedSenderBalance = fromAccount.getAmount() - transferRequest.getAmount();
+				
+				double updatedReceiverBalance = accountDAO.retrieveBalance(transferRequest.getDestinationId()) + transferRequest.getAmount();
+				
+				String sqlToAccount = "UPDATE accounts SET balance = ? WHERE user_id = ?;";
+				jdbcTemplate.update(sqlToAccount, updatedReceiverBalance, transferRequest.getDestinationId());
+
+				String sqlFromAccount = "UPDATE accounts SET balance = ? WHERE user_id = ?;";
+				jdbcTemplate.update(sqlFromAccount, updatedSenderBalance, fromAccount.getDestinationId());
+
+			}
 		} catch (Exception ex) {
 			System.out.println(ex);
 		}
-		
-		return "Transfer Complete";
-		}
 
-	
+		return "Transfer Complete";
+	}
+
 	private Transfer mapToTransfer(SqlRowSet results) {
-		
+
 		Transfer transfer = new Transfer();
-		
+
 		transfer.setTransferId(results.getInt("transfer_id"));
 		transfer.setTransferTypeId(results.getInt("transfer_type_id"));
 		transfer.setTransferStatusId(results.getInt("transfer_status_id"));
 		transfer.setAccountFrom(results.getInt("account_from"));
 		transfer.setAccountTo(results.getInt("account_to"));
 		transfer.setAmount(results.getDouble("amount"));
-		
+
 		try {
 			transfer.setUserFrom(results.getString("userFrom"));
-			transfer.setUserTo(results.getString("userTo"));			
-		} catch (Exception e) {}
+			transfer.setUserTo(results.getString("userTo"));
+		} catch (Exception e) {
+		}
 		try {
 			transfer.setTransferType(results.getString("transfer_type_desc"));
-			transfer.setTransferStatus(results.getString("transfer_status_desc"));			
-		} catch (Exception e) {}
-		
+			transfer.setTransferStatus(results.getString("transfer_status_desc"));
+		} catch (Exception e) {
+		}
+
 		return transfer;
 	}
 
 	private TransferRequest mapToRequest(SqlRowSet results) {
 		TransferRequest request = new TransferRequest();
-		
+
 		request.setDestinationId(results.getInt("account_id"));
 		request.setAmount(results.getDouble("balance"));
-		
+
 		return request;
 	}
-	
-	
 
 }

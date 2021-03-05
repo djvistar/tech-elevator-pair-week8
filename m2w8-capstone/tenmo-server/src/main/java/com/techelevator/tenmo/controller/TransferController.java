@@ -14,6 +14,7 @@ import com.techelevator.tenmo.dao.AccountDAO;
 import com.techelevator.tenmo.dao.JdbcAccountDAO;
 import com.techelevator.tenmo.dao.JdbcTransferDAO;
 import com.techelevator.tenmo.dao.TransferDAO;
+import com.techelevator.tenmo.dao.UserDAO;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.TransferRequest;
@@ -22,25 +23,29 @@ import com.techelevator.tenmo.model.TransferRequest;
 @PreAuthorize("isAuthenticated()")
 public class TransferController {
 
-	private JdbcAccountDAO accountDao;
+	private AccountDAO accountDao;
 	private Account account;
-	private JdbcTransferDAO transferDao;
+	private TransferDAO transferDao;
+	private UserDAO userDao;
 	
-	public TransferController(JdbcAccountDAO accountDao, JdbcTransferDAO transferDao) {
+	public TransferController(AccountDAO accountDao, TransferDAO transferDao, UserDAO userDao) {
 		this.accountDao = accountDao;
 		this.transferDao = transferDao;
+		this.userDao = userDao;
 	}
 	
 	@RequestMapping( path = "accounts", method = RequestMethod.GET )  
 	public double returnBalance(Principal principal) {
-		return accountDao.retrieveBalance(principal.getName());
+		int id = userDao.findIdByUsername(principal.getName());
+		return accountDao.retrieveBalance(id);
 	}
 	
-	@RequestMapping( path = "transfter", method = RequestMethod.POST )
-	public void transferFunds(@RequestBody TransferRequest transfer, Double amount, Principal principal) {
+	@RequestMapping( path = "transfer", method = RequestMethod.POST )
+	public void transferFunds(@RequestBody TransferRequest toAccount, Principal principal) {
 		//transferDao.addFundsToReceiverAccount(receiverId, amountToTransfer);
 		//transferDao.removeFundsFromSenderAccount(principal.getName(), amountToTransfer);
-		transferDao.sendTransfer(transfer, principal.getName(), amount);
+		int senderId = userDao.findIdByUsername(principal.getName());
+		transferDao.sendTransfer(toAccount, senderId);
 	}
 	
 	@RequestMapping( path = "transfers", method = RequestMethod.GET )
