@@ -18,6 +18,7 @@ import com.techelevator.tenmo.dao.UserDAO;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
 import com.techelevator.tenmo.model.TransferRequest;
+import com.techelevator.tenmo.model.User;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -38,6 +39,12 @@ public class TransferController {
 	public double returnBalance(Principal principal) {
 		int id = userDao.findIdByUsername(principal.getName());
 		return accountDao.retrieveBalance(id);
+	}
+	
+	@RequestMapping( path = "allUsers", method = RequestMethod.GET)
+	public List<User> listAllUsers(){
+		List<User> allUsers = userDao.findAll();
+		return allUsers;
 	}
 	
 	@RequestMapping( path = "transfer", method = RequestMethod.POST )
