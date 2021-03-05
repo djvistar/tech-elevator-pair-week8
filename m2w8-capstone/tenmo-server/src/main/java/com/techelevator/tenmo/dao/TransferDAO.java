@@ -15,6 +15,6 @@ public interface TransferDAO {
 	
 	List<Transfer> listOfAllTransfers();
 	 Transfer listTransferDetails(int transferId);
-	 public String sendTransfer(TransferRequest transfer, int senderId);
+	 public String sendTransfer(TransferRequest transferRequest, int senderId);
 	
 }
