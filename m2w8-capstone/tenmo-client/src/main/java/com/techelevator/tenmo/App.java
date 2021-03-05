@@ -1,10 +1,12 @@
 package com.techelevator.tenmo;
 
 import java.security.Principal;
+import java.util.Scanner;
 
 import com.techelevator.tenmo.models.Account;
 import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.tenmo.models.Transfer;
+import com.techelevator.tenmo.models.User;
 import com.techelevator.tenmo.models.UserCredentials;
 import com.techelevator.tenmo.services.AuthenticationService;
 import com.techelevator.tenmo.services.AuthenticationServiceException;
@@ -99,6 +101,14 @@ public class App {
 		Transfer[] allTransfers = transferService.viewTransferHistory();
 		printAllTransfers(allTransfers);
 
+		Scanner scanner = new Scanner(System.in);
+		String input = scanner.nextLine();
+		int transferId = Integer.parseInt(input);
+		if (transferId != 0) {
+			Transfer transferDetails = transferService.viewTransferDetails(transferId);
+			printTransferDetails(transferDetails);
+		}
+
 	}
 
 	private void viewPendingRequests() {
@@ -108,6 +118,14 @@ public class App {
 
 	private void sendBucks() {
 		// TODO Auto-generated method stub
+		transferService.setAUTH_TOKEN(currentUser.getToken());
+
+		User[] users = transferService.listOfUsers();
+		printAllUsers(users);
+		
+		Scanner scanner = new Scanner(System.in);
+		String input = scanner.nextLine();
+		
 
 	}
 
@@ -183,6 +201,7 @@ public class App {
 		for (Transfer transfer : transfers) {
 			printTransfer(transfer);
 		}
+		System.out.print("Please enter transfer ID to view details (0 to cancel): ");
 
 	}
 
@@ -198,6 +217,37 @@ public class App {
 			}
 		}
 
+	}
+
+	private void printTransferDetails(Transfer transfer) {
+		if (transfer != null) {
+
+			System.out.println("--------------------------------------------\r\n" + "Transfer Details\r\n"
+					+ "--------------------------------------------\r\n" + " Id: " + transfer.getTransferId() + "\r\n"
+					+ " From: " + transfer.getUserFrom() + "\r\n" + " To: " + transfer.getUserTo() + "\r\n" + " Type: "
+					+ transfer.getTransferType() + "\r\n" + " Status: " + transfer.getTransferStatus() + "\r\n"
+					+ " Amount: $" + transfer.getAmount());
+
+		}
+
+	}
+
+	private void printAllUsers(User[] users) {
+
+		System.out.print(String.format("%-15s%10s\n\n", "User Id", "Name"));
+
+		for (User user : users) {
+			if(!user.getUsername().equalsIgnoreCase(currentUser.getUser().getUsername()))
+			printUser(user);
+		}
+		System.out.print("Enter ID of user you are sending to (0 to cancel): ");
+		System.out.print("Enter amount: ");
+	}
+
+	private void printUser(User user) {
+
+		System.out.print(String.format("%-15s%10s\n", user.getId(), user.getUsername()));
+		;
 	}
 
 }

@@ -3,6 +3,7 @@ package com.techelevator.tenmo.services;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,10 +50,11 @@ public class TransferService {
 	
 	public Transfer[] viewTransferHistory(){
 		Transfer[] allTransfers = null;
-	
+	   
 	    try {
 	        allTransfers = restTemplate.exchange(API_BASE_URL + "transfers", HttpMethod.GET, makeAuthEntity(), Transfer[].class).getBody();
-	      } catch (RestClientResponseException ex) {
+       
+	    } catch (RestClientResponseException ex) {
 	    	System.out.println(ex);
 	      } catch (ResourceAccessException ex) {
 	    	System.out.println(ex);  
@@ -62,7 +64,51 @@ public class TransferService {
 		
 	}
 	
+
+ public Transfer viewTransferDetails(int transferId) {
+	  Transfer transferDetails = null;
 	
+  	try {
+	        transferDetails = restTemplate.exchange(API_BASE_URL + "transfers/" + transferId, HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
+       } catch (RestClientResponseException ex) {
+ 	     System.out.println(ex);
+      } catch (ResourceAccessException ex) {
+ 	    System.out.println(ex);  
+   }
+	return transferDetails; 
+ }
+	
+ 
+ public Transfer sendBucks() {
+	 
+	 Transfer transfer = null;
+	 
+	 try {
+		 transfer =	restTemplate.exchange(API_BASE_URL + "transfer", HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
+
+	 } catch (RestClientResponseException ex) {
+ 	     System.out.println(ex);
+      } catch (ResourceAccessException ex) {
+ 	    System.out.println(ex);  
+   }
+	return transfer; 
+ }
+ 
+ public User[] listOfUsers() {
+	 User[] users = null;
+	 
+	 try {
+	        users = restTemplate.exchange(API_BASE_URL + "allUsers", HttpMethod.GET, makeAuthEntity(), User[].class).getBody();
+
+	 }catch (RestClientResponseException ex) {
+ 	     System.out.println(ex);
+      } catch (ResourceAccessException ex) {
+ 	    System.out.println(ex);  
+   }
+	 
+	 
+	 return users;
+ }
 	
 
 	public void setAUTH_TOKEN(String aUTH_TOKEN) {
