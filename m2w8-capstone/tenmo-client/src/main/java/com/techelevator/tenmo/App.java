@@ -73,10 +73,15 @@ private static final String API_BASE_URL = "http://localhost:8080/";
 	private void viewCurrentBalance() {
 	
 		// TODO Auto-generated method stub
+<<<<<<< HEAD
 		//Account balance = transferService.viewCurrentBalance();
 		TransferService transferService = new TransferService(API_BASE_URL, currentUser);
 		transferService.viewCurrentBalance();
 		//System.out.println("Your current Account balance is: $" + balance);
+=======
+		double balance = transferService.viewCurrentBalance();
+		System.out.println("Your current Account balance is: $" + balance);
+>>>>>>> fbc768dc73f37fe34ebe06831c721443ae2b56a1
 		
 	}
 
