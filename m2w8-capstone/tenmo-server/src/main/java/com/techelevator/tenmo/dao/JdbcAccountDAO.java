@@ -29,6 +29,8 @@ public class JdbcAccountDAO implements AccountDAO{
 		
 		usernameResult.next();
 		
+		
+		
 		User user = mapToUser(usernameResult);
 		long userId = user.getId();
 
