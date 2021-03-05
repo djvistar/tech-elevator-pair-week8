@@ -103,14 +103,17 @@ public class JdbcTransferDAO implements TransferDAO {
 	public String sendTransfer(TransferRequest transferRequest, int senderId) {
 		// TODO Auto-generated method stub
 		try {
-			String sqlSelect = "SELECT accounts.account_id, accounts.balance, accounts.user_id FROM accounts "
-					+ "JOIN users ON accounts.user_id = users.user_id " +
-					// "JOIN transfers ON transfers.account_from = accounts.account_id"
-					"WHERE users.user_id = ?;";
-			SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, senderId);
-
-			usernameResult.next();
-			TransferRequest fromAccount = mapToRequest(usernameResult);
+			String sqlSelectSender = "SELECT account_id, balance, user_id FROM accounts " +
+							         "WHERE user_id = ?;";
+			SqlRowSet usernameResultSender = jdbcTemplate.queryForRowSet(sqlSelectSender, senderId);
+			usernameResultSender.next();
+			TransferRequest fromAccount = mapToRequest(usernameResultSender);
+			
+			String sqlSelectReceiver = "SELECT account_id, balance, user_id FROM accounts " +
+					   				   "WHERE user_id = ?;";
+			SqlRowSet usernameResultReceiver = jdbcTemplate.queryForRowSet(sqlSelectReceiver, transferRequest.getReceiverId());
+			usernameResultReceiver.next();
+			TransferRequest toAccount = mapToRequest(usernameResultReceiver);
 
 			if (fromAccount.getDestinationId() == transferRequest.getDestinationId()) {
 				return "You can not send money to your self.";
@@ -122,7 +125,7 @@ public class JdbcTransferDAO implements TransferDAO {
 			} else {
 				String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "
 						+ "VALUES (2,2,?,?,?) ";
-				jdbcTemplate.update(sql, fromAccount.getDestinationId(), transferRequest.getDestinationId(),
+				jdbcTemplate.update(sql, fromAccount.getDestinationId(), toAccount.getDestinationId(),
 						transferRequest.getAmount());
 
 				// Call the accountDao and get the current balance for the user and add the transfer request and use that amount to update the balance
@@ -130,10 +133,10 @@ public class JdbcTransferDAO implements TransferDAO {
 				
 				double updatedSenderBalance =fromAccount.getAmount() - transferRequest.getAmount();
 				
-				double updatedReceiverBalance = accountDAO.retrieveBalance(transferRequest.getReceiverId()) + transferRequest.getAmount();
+				double updatedReceiverBalance = accountDAO.retrieveBalance(toAccount.getReceiverId()) + transferRequest.getAmount();
 				
 				String sqlToAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
-				jdbcTemplate.update(sqlToAccount,transferRequest.getDestinationId(), transferRequest.getReceiverId(), updatedReceiverBalance, transferRequest.getDestinationId());
+				jdbcTemplate.update(sqlToAccount, toAccount.getDestinationId(), toAccount.getReceiverId(), updatedReceiverBalance, toAccount.getDestinationId());
 
 				String sqlFromAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
 				jdbcTemplate.update(sqlFromAccount,fromAccount.getDestinationId(), fromAccount.getReceiverId(), updatedSenderBalance, fromAccount.getDestinationId());

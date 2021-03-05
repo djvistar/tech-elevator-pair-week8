@@ -6,6 +6,7 @@ import java.util.Scanner;
 import com.techelevator.tenmo.models.Account;
 import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.tenmo.models.Transfer;
+import com.techelevator.tenmo.models.TransferRequest;
 import com.techelevator.tenmo.models.User;
 import com.techelevator.tenmo.models.UserCredentials;
 import com.techelevator.tenmo.services.AuthenticationService;
@@ -123,17 +124,22 @@ public class App {
 		User[] users = transferService.listOfUsers();
 		printAllUsers(users);
 		
-		Scanner scanner = new Scanner(System.in);
-		String input = scanner.nextLine();
 		
-//		int receiverId;
-//		int destinationId;
-//		for (User user : users) {
-//	
-//			if(user.getId() = Integer.parseInt(input)) {
-//				receiverId = user.getId();
-//				desti
-//			}
+		System.out.print("Enter ID of user you are sending to (0 to cancel): ");
+		Scanner scanner = new Scanner(System.in);
+		String inputUserId = scanner.nextLine();
+		int userId = Integer.parseInt(inputUserId);
+		
+		System.out.print("Enter amount: ");
+		String inputAmount = scanner.nextLine();
+		double amount = Double.parseDouble(inputAmount);
+		
+		TransferRequest transferRequest = new TransferRequest();
+		transferRequest.setReceiverId(userId);
+		transferRequest.setAmount(amount);
+		
+		transferService.sendBucks(transferRequest);
+		
 	
 
 	}
@@ -249,8 +255,8 @@ public class App {
 			if(!user.getUsername().equalsIgnoreCase(currentUser.getUser().getUsername()))
 			printUser(user);
 		}
-		System.out.print("Enter ID of user you are sending to (0 to cancel): ");
-		System.out.print("Enter amount: ");
+		
+		
 	}
 
 	private void printUser(User user) {
