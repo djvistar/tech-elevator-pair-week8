@@ -20,51 +20,28 @@ public class TransferService {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	private String API_BASE_URL;
-<<<<<<< HEAD
-	 private AuthenticatedUser currentUser;
-	
+
+	private AuthenticatedUser currentUser;
+
 	public TransferService(String url, AuthenticatedUser currentUser) {
 		API_BASE_URL = url;
-	  }
-	
-	
-	//viewCurrentBalance
-	//viewTransferHistory()
-	//sendBucks();
-	
-	
-	public Account viewCurrentBalance() {
-		Account account = null;
-	      try{
-	    	  account= restTemplate.exchange(API_BASE_URL + "accounts/balance" + currentUser.getUser().getId() ,  HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
-	      }catch (RestClientResponseException ex) {
-	  		System.out.println(ex);
-	  	} catch (ResourceAccessException ex) {
-	  		System.out.println(ex);
-	  	} 
-=======
-
-	public TransferService(String url) {
-		API_BASE_URL = url;
 	}
->>>>>>> fbc768dc73f37fe34ebe06831c721443ae2b56a1
 
 	// viewCurrentBalance
 	// viewTransferHistory()
 	// sendBucks();
 
-	public double viewCurrentBalance() {
-		double balance = 0;
+	public Account viewCurrentBalance() {
+		Account account = null;
 		try {
-			balance = restTemplate.exchange(API_BASE_URL + "accounts", HttpMethod.GET, makeAuthEntity(), double.class)
-					.getBody();
+			account = restTemplate.exchange(API_BASE_URL + "accounts/balance" + currentUser.getUser().getId(),
+					HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
 		} catch (RestClientResponseException ex) {
 			System.out.println(ex);
 		} catch (ResourceAccessException ex) {
 			System.out.println(ex);
 		}
-
-		return balance;
+		return account;
 	}
 
 	private HttpEntity makeAuthEntity() {
