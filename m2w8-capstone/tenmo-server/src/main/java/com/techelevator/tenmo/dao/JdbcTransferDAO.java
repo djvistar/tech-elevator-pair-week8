@@ -103,7 +103,7 @@ public class JdbcTransferDAO implements TransferDAO {
 	public String sendTransfer(TransferRequest transferRequest, int senderId) {
 		// TODO Auto-generated method stub
 		try {
-			String sqlSelect = "SELECT accounts.account_id, accounts.balance FROM accounts "
+			String sqlSelect = "SELECT accounts.account_id, accounts.balance, accounts.user_id FROM accounts "
 					+ "JOIN users ON accounts.user_id = users.user_id " +
 					// "JOIN transfers ON transfers.account_from = accounts.account_id"
 					"WHERE users.user_id = ?;";
@@ -128,15 +128,15 @@ public class JdbcTransferDAO implements TransferDAO {
 				// Call the accountDao and get the current balance for the user and add the transfer request and use that amount to update the balance
 				// Don't do math in SQL, Spring doesn't like that
 				
-				double updatedSenderBalance = fromAccount.getAmount() - transferRequest.getAmount();
+				double updatedSenderBalance =fromAccount.getAmount() - transferRequest.getAmount();
 				
-				double updatedReceiverBalance = accountDAO.retrieveBalance(transferRequest.getDestinationId()) + transferRequest.getAmount();
+				double updatedReceiverBalance = accountDAO.retrieveBalance(transferRequest.getReceiverId()) + transferRequest.getAmount();
 				
-				String sqlToAccount = "UPDATE accounts SET balance = ? WHERE user_id = ?;";
-				jdbcTemplate.update(sqlToAccount, updatedReceiverBalance, transferRequest.getDestinationId());
+				String sqlToAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
+				jdbcTemplate.update(sqlToAccount,transferRequest.getDestinationId(), transferRequest.getReceiverId(), updatedReceiverBalance, transferRequest.getDestinationId());
 
-				String sqlFromAccount = "UPDATE accounts SET balance = ? WHERE user_id = ?;";
-				jdbcTemplate.update(sqlFromAccount, updatedSenderBalance, fromAccount.getDestinationId());
+				String sqlFromAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
+				jdbcTemplate.update(sqlFromAccount,fromAccount.getDestinationId(), fromAccount.getReceiverId(), updatedSenderBalance, fromAccount.getDestinationId());
 
 			}
 		} catch (Exception ex) {
@@ -176,6 +176,7 @@ public class JdbcTransferDAO implements TransferDAO {
 
 		request.setDestinationId(results.getInt("account_id"));
 		request.setAmount(results.getDouble("balance"));
+		request.setReceiverId(results.getInt("user_id"));
 
 		return request;
 	}
