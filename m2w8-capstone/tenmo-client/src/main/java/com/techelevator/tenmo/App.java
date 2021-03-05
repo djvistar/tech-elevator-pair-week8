@@ -126,6 +126,15 @@ public class App {
 		Scanner scanner = new Scanner(System.in);
 		String input = scanner.nextLine();
 		
+//		int receiverId;
+//		int destinationId;
+//		for (User user : users) {
+//	
+//			if(user.getId() = Integer.parseInt(input)) {
+//				receiverId = user.getId();
+//				desti
+//			}
+	
 
 	}
 

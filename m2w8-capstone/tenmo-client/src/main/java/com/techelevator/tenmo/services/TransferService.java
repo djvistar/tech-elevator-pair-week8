@@ -79,12 +79,12 @@ public class TransferService {
  }
 	
  
- public Transfer sendBucks() {
+ public Transfer sendBucks(Transfer transfer) {
 	 
-	 Transfer transfer = null;
+	 //Transfer transfer = ;
 	 
 	 try {
-		 transfer =	restTemplate.exchange(API_BASE_URL + "transfer", HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
+		 transfer =	restTemplate.exchange(API_BASE_URL + "transfer", HttpMethod.POST, makeAuthEntity(), Transfer.class).getBody();
 
 	 } catch (RestClientResponseException ex) {
  	     System.out.println(ex);
