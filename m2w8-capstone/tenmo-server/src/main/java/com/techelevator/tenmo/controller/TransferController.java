@@ -3,8 +3,6 @@ package com.techelevator.tenmo.controller;
 import java.security.Principal;
 import java.util.List;
 
-import javax.validation.Valid;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,7 +16,6 @@ import com.techelevator.tenmo.dao.JdbcTransferDAO;
 import com.techelevator.tenmo.dao.TransferDAO;
 import com.techelevator.tenmo.model.Account;
 import com.techelevator.tenmo.model.Transfer;
-import com.techelevator.tenmo.model.TransferRequest;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -37,12 +34,11 @@ public class TransferController {
 	public double returnBalance(Principal principal) {
 		return accountDao.retrieveBalance(principal.getName());
 	}
-
-	@RequestMapping( path = "transfer", method = RequestMethod.POST )
-	public void transferFunds(@RequestBody TransferRequest transfer, Double amount, Principal principal) {
-//		transferDao.addFundsToReceiverAccount(receiverId, amountToTransfer);
-//		transferDao.removeFundsFromSenderAccount(principal.getName(), amountToTransfer);
-		transferDao.sendTransfer(transfer, principal.getName(), amount);
+	
+	@RequestMapping( path = "transfers/{recieverId}/{amountToTransfer}", method = RequestMethod.POST )
+	public void transferFunds(@PathVariable int receiverId, @PathVariable double amountToTransfer, Principal principal) {
+		transferDao.addFundsToReceiverAccount(receiverId, amountToTransfer);
+		transferDao.removeFundsFromSenderAccount(principal.getName(), amountToTransfer);
 	}
 	
 	@RequestMapping( path = "transfers", method = RequestMethod.GET )
@@ -54,5 +50,6 @@ public class TransferController {
 	public Transfer listTransferDetails(@PathVariable int transferId) {
 		return transferDao.listTransferDetails(transferId);
 	}
+	
 	
 }
