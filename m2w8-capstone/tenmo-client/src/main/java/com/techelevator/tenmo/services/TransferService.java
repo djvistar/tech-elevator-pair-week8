@@ -9,8 +9,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
-
+import com.techelevator.tenmo.models.User;
 import com.techelevator.tenmo.models.Account;
+import com.techelevator.tenmo.models.AuthenticatedUser;
 import com.techelevator.view.ConsoleService;
 
 
@@ -21,9 +22,9 @@ public class TransferService {
 	
 	private  RestTemplate restTemplate = new RestTemplate();
 	private String API_BASE_URL;
+	 private AuthenticatedUser currentUser;
 	
-	
-	public TransferService(String url) {
+	public TransferService(String url, AuthenticatedUser currentUser) {
 		API_BASE_URL = url;
 	  }
 	
@@ -36,7 +37,7 @@ public class TransferService {
 	public Account viewCurrentBalance() {
 		Account account = null;
 	      try{
-	    	  account= restTemplate.exchange(API_BASE_URL + "accounts",  HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+	    	  account= restTemplate.exchange(API_BASE_URL + "accounts/balance" + currentUser.getUser().getId() ,  HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
 	      }catch (RestClientResponseException ex) {
 	  		System.out.println(ex);
 	  	} catch (ResourceAccessException ex) {
