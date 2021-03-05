@@ -1,6 +1,8 @@
 package com.techelevator.tenmo.services;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +14,7 @@ import org.springframework.web.client.RestTemplate;
 import com.techelevator.tenmo.models.User;
 import com.techelevator.tenmo.models.Account;
 import com.techelevator.tenmo.models.AuthenticatedUser;
+import com.techelevator.tenmo.models.Transfer;
 import com.techelevator.view.ConsoleService;
 
 public class TransferService {
@@ -23,7 +26,7 @@ public class TransferService {
 
 	private AuthenticatedUser currentUser;
 
-	public TransferService(String url, AuthenticatedUser currentUser) {
+	public TransferService(String url) {
 		API_BASE_URL = url;
 	}
 
@@ -31,11 +34,11 @@ public class TransferService {
 	// viewTransferHistory()
 	// sendBucks();
 
-	public Account viewCurrentBalance() {
-		Account account = null;
+	public Double viewCurrentBalance() {
+		Double account = 0.0;
 		try {
-			account = restTemplate.exchange(API_BASE_URL + "accounts/balance" + currentUser.getUser().getId(),
-					HttpMethod.GET, makeAuthEntity(), Account.class).getBody();
+			account = restTemplate.exchange(API_BASE_URL + "accounts",
+					HttpMethod.GET, makeAuthEntity(), Double.class).getBody();
 		} catch (RestClientResponseException ex) {
 			System.out.println(ex);
 		} catch (ResourceAccessException ex) {
@@ -43,7 +46,29 @@ public class TransferService {
 		}
 		return account;
 	}
+	
+	public Transfer[] viewTransferHistory(){
+		Transfer[] allTransfers = null;
+	
+	    try {
+	        allTransfers = restTemplate.exchange(API_BASE_URL + "transfers", HttpMethod.GET, makeAuthEntity(), Transfer[].class).getBody();
+	      } catch (RestClientResponseException ex) {
+	    	System.out.println(ex);
+	      } catch (ResourceAccessException ex) {
+	    	System.out.println(ex);  
+	      }
 
+		return allTransfers;
+		
+	}
+	
+	
+	
+
+	public void setAUTH_TOKEN(String aUTH_TOKEN) {
+		AUTH_TOKEN = aUTH_TOKEN;
+	}
+	
 	private HttpEntity makeAuthEntity() {
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
