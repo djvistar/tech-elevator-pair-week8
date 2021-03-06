@@ -2,6 +2,7 @@ package com.techelevator;
 
 import static org.junit.Assert.assertEquals;
 
+import java.math.BigDecimal;
 import java.sql.SQLException;
 
 import javax.sql.DataSource;

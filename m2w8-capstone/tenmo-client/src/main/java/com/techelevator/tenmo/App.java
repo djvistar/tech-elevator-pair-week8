@@ -1,6 +1,7 @@
 package com.techelevator.tenmo;
 
 import java.security.Principal;
+import java.text.NumberFormat;
 import java.util.Scanner;
 
 import com.techelevator.tenmo.models.Account;
@@ -87,11 +88,12 @@ public class App {
 		// Account balance = transferService.viewCurrentBalance();
 		// TransferService transferService = new TransferService(API_BASE_URL,
 		// currentUser);
+
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
 		transferService.setAUTH_TOKEN(currentUser.getToken());
 		Double balance = transferService.viewCurrentBalance();
-		System.out.println("Your current Account balance is: $" + balance);
-
-		// System.out.println("Your current Account balance is: $" + balance);
+		System.out.println("Your current Account balance is: " + formatter.format(balance));
 
 	}
 
@@ -119,26 +121,40 @@ public class App {
 
 	private void sendBucks() {
 		// TODO Auto-generated method stub
+
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
 		transferService.setAUTH_TOKEN(currentUser.getToken());
 
 		User[] users = transferService.listOfUsers();
 		printAllUsers(users);
-		
-		
-		System.out.print("Enter ID of user you are sending to (0 to cancel): ");
+
+		System.out.print("\nEnter ID of user you are sending to (0 to cancel): ");
 		Scanner scanner = new Scanner(System.in);
 		String inputUserId = scanner.nextLine();
 		int userId = Integer.parseInt(inputUserId);
-		
-		System.out.print("Enter amount: ");
-		String inputAmount = scanner.nextLine();
-		double amount = Double.parseDouble(inputAmount);
-		
-		TransferRequest transferRequest = new TransferRequest();
-		transferRequest.setReceiverId(userId);
-		transferRequest.setAmount(amount);
-		
-		transferService.sendBucks(transferRequest);
+
+		if (userId != 0) {
+
+			System.out.print("Enter amount: ");
+			String inputAmount = scanner.nextLine();
+			double amount = Double.parseDouble(inputAmount);
+
+			TransferRequest transferRequest = new TransferRequest();
+			transferRequest.setReceiverId(userId);
+			transferRequest.setAmount(amount);
+
+			transferService.sendBucks(transferRequest);
+			
+			if (transferService.viewCurrentBalance() < amount) {
+				System.out.println("\nInsufficient Funds");
+			} else if (amount < 0 ) {
+				System.out.println("You cannot send a negative transfer");
+			} else {
+				System.out.println(
+					"\nYou have sent " + formatter.format(amount) + " to " + transferRequest.getReceiverId() + ".");
+			}
+		}
 
 	}
 
@@ -209,7 +225,7 @@ public class App {
 
 	private void printAllTransfers(Transfer[] transfers) {
 
-		System.out.print(String.format("%-15s%-40s%10s\n\n", "Transfer ID", "To/From", "Amount"));
+		System.out.print(String.format("%-15s%-15s%10s\n\n", "Transfer ID", "To/From", "Amount"));
 
 		for (Transfer transfer : transfers) {
 			printTransfer(transfer);
@@ -220,26 +236,31 @@ public class App {
 
 	private void printTransfer(Transfer transfer) {
 
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
 		if (transfer != null) {
 			if (!transfer.getUserFrom().equalsIgnoreCase(currentUser.getUser().getUsername())) {
-				System.out.print(String.format("%-15s%-40s$%10s\n", transfer.getTransferId(),
-						"From: " + transfer.getUserFrom(), transfer.getAmount()));
+				System.out.print(String.format("%-15s%-15s%10s\n", transfer.getTransferId(),
+						"From: " + transfer.getUserFrom(), formatter.format(transfer.getAmount())));
 			} else {
-				System.out.print(String.format("%-15s%-40s$%10s\n", transfer.getTransferId(),
-						"To: " + transfer.getUserTo(), transfer.getAmount()));
+				System.out.print(String.format("%-15s%-15s%10s\n", transfer.getTransferId(),
+						"To: " + transfer.getUserTo(), formatter.format(transfer.getAmount())));
 			}
 		}
 
 	}
 
 	private void printTransferDetails(Transfer transfer) {
+
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+
 		if (transfer != null) {
 
 			System.out.println("--------------------------------------------\r\n" + "Transfer Details\r\n"
 					+ "--------------------------------------------\r\n" + " Id: " + transfer.getTransferId() + "\r\n"
 					+ " From: " + transfer.getUserFrom() + "\r\n" + " To: " + transfer.getUserTo() + "\r\n" + " Type: "
 					+ transfer.getTransferType() + "\r\n" + " Status: " + transfer.getTransferStatus() + "\r\n"
-					+ " Amount: $" + transfer.getAmount());
+					+ " Amount: " + formatter.format(transfer.getAmount()));
 
 		}
 
@@ -247,19 +268,18 @@ public class App {
 
 	private void printAllUsers(User[] users) {
 
-		System.out.print(String.format("%-15s%10s\n\n", "User Id", "Name"));
+		System.out.print(String.format("%-10s%10s\n\n", "User Id", "Name"));
 
 		for (User user : users) {
-			if(!user.getUsername().equalsIgnoreCase(currentUser.getUser().getUsername()))
-			printUser(user);
+			if (!user.getUsername().equalsIgnoreCase(currentUser.getUser().getUsername()))
+				printUser(user);
 		}
-		
-		
+
 	}
 
 	private void printUser(User user) {
 
-		System.out.print(String.format("%-15s%10s\n", user.getId(), user.getUsername()));
+		System.out.print(String.format("%-10s%10s\n", user.getId(), user.getUsername()));
 		;
 	}
 

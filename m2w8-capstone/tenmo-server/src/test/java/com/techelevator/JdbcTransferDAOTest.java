@@ -222,6 +222,8 @@ public class JdbcTransferDAOTest {
 		
 		String result = dao.sendTransfer(transferRequest, 1);
 		
+		//"You've successfully sent " + formatter.format(fromAccount.getAmount()) + " to " + toAccount.getReceiverId()
+		
 		assertEquals("Transfer Complete", result);
 		
 	}

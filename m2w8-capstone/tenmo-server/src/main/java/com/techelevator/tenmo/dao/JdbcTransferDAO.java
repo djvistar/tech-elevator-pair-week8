@@ -1,5 +1,6 @@
 package com.techelevator.tenmo.dao;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -69,6 +70,9 @@ public class JdbcTransferDAO implements TransferDAO {
 	@Override
 	public String sendTransfer(TransferRequest transferRequest, int senderId) {
 		// TODO Auto-generated method stub
+		
+		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		
 		try {
 			String sqlSelectSender = "SELECT account_id, balance, user_id FROM accounts " +
 							         "WHERE user_id = ?;";
@@ -104,13 +108,16 @@ public class JdbcTransferDAO implements TransferDAO {
 
 				String sqlFromAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
 				jdbcTemplate.update(sqlFromAccount,fromAccount.getDestinationId(), fromAccount.getReceiverId(), updatedSenderBalance, fromAccount.getDestinationId());
-
+				
+				//message = "You've successfully sent " + formatter.format(fromAccount.getAmount()) + " to " + toAccount.getReceiverId();
+				
 			}
 		} catch (Exception ex) {
 			System.out.println(ex);
 		}
 
 		return "Transfer Complete";
+		
 	}
 
 	private Transfer mapToTransfer(SqlRowSet results) {
