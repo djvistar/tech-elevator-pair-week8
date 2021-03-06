@@ -27,42 +27,16 @@ public class JdbcTransferDAO implements TransferDAO {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-//	@Override
-//	public void addFundsToReceiverAccount(long receiverId, double amountSent) {
-//		// TODO Auto-generated method stub
-//		
-//		String sql = "UPDATE accounts SET balance = balance + ? WHERE user_id = ?;";
-//		jdbcTemplate.update(sql, amountSent, receiverId);
-//		
-//	}
-//
-//	@Override
-//	public void removeFundsFromSenderAccount(String username, double amountSent) {
-//		// TODO Auto-generated method stub
-//
-//		String sqlSelect = "SELECT user_id FROM users WHERE username = ?;";
-//		SqlRowSet usernameResult = jdbcTemplate.queryForRowSet(sqlSelect, username);
-//		int senderId = usernameResult.getInt("user_id");
-//		
-//		String sqlUpdate = "UPDATE accounts SET balance = balance - ? WHERE user_id = ?;";
-//		jdbcTemplate.update(sqlUpdate, amountSent, senderId);
-//	}
-
 	@Override
 	public List<Transfer> listOfAllTransfers() {
 		// TODO Auto-generated method stub
 
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
 
-//		String sql = "SELECT transfers.* " + 
-//					 "FROM transfers " + 
-//					 "JOIN accounts ON accounts.account_id = transfers.account_from " +
-//					 "JOIN users ON users.user_id = accounts.user_id;";
 		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo " + "FROM transfers t "
 				+ "JOIN accounts a ON t.account_from = a.account_id "
 				+ "JOIN accounts b ON t.account_to = b.account_id " + "JOIN users u ON a.user_id = u.user_id "
 				+ "JOIN users v ON b.user_id = v.user_id ";
-//				"WHERE a.user_id = ? OR b.user_id = ? ";
 
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
 
@@ -76,13 +50,6 @@ public class JdbcTransferDAO implements TransferDAO {
 
 	public Transfer listTransferDetails(int transferId) {
 
-//		
-//		String sql = "SELECT transfers.* " +
-//					 "FROM transfers " +
-//					 "JOIN accounts ON accounts.account_id = transfers.account_from " + 
-//					 "OR accounts.account_id = transfers.account_to " + 
-//					 "JOIN users ON users.user_id = accounts.user_id " + 
-//					 "WHERE transfer_id = ?;";
 		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc FROM transfers t "
 				+ "JOIN accounts a ON t.account_from = a.account_id "
 				+ "JOIN accounts b ON t.account_to = b.account_id " + "JOIN users u ON a.user_id = u.user_id "
@@ -127,9 +94,6 @@ public class JdbcTransferDAO implements TransferDAO {
 						+ "VALUES (2,2,?,?,?) ";
 				jdbcTemplate.update(sql, fromAccount.getDestinationId(), toAccount.getDestinationId(),
 						transferRequest.getAmount());
-
-				// Call the accountDao and get the current balance for the user and add the transfer request and use that amount to update the balance
-				// Don't do math in SQL, Spring doesn't like that
 				
 				double updatedSenderBalance =fromAccount.getAmount() - transferRequest.getAmount();
 				

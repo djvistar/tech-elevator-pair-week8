@@ -139,8 +139,6 @@ public class App {
 		transferRequest.setAmount(amount);
 		
 		transferService.sendBucks(transferRequest);
-		
-	
 
 	}
 

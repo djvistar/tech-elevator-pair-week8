@@ -4,11 +4,7 @@ public class Account {
 
 	private int accountId;
 	private double accountBalance;
-	
-//	public Account() {
-//		this.accountId = accountId;
-//		this.accountBalance = accountBalance;
-//	}
+	private int userId;
 
 	public int getAccountId() {
 		return accountId;
@@ -24,6 +20,14 @@ public class Account {
 
 	public void setAccountBalance(double accountBalance) {
 		this.accountBalance = accountBalance;
+	}
+	
+	public int getUserId() {
+		return userId;
+	}
+
+	public void setUserId(int userId) {
+		this.userId = userId;
 	}
 
 }
