@@ -74,9 +74,9 @@ public class JdbcAccountDAOTest {
 	
 	@Test
 	public void test_if_returns_account_balance() {
-		JdbcTemplate jdbcTemplate = new JdbcTemplate();
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSource);
 		
-		String insertUser = "INSERT INTO users (username, password_hash) VALUES (Barack Obama, qweproiuasdnfakl);";
+		String insertUser = "INSERT INTO users (username, password_hash) VALUES ('Barack Obama', 'qweproiuasdnfakl');";
 		jdbcTemplate.update(insertUser);
 
 		String getUserId = "SELECT user_id FROM users WHERE username = 'Barack Obama';";
@@ -94,7 +94,7 @@ public class JdbcAccountDAOTest {
 		double result = dao.retrieveBalance(testUserId);
 		
 		
-		Assert.assertEquals(testAccount.getAccountBalance(), result);
+		Assert.assertEquals(testAccount.getAccountBalance(), result, 0);
 		
 	}
 	
