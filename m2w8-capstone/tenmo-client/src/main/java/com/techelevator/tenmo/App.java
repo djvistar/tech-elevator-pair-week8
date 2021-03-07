@@ -85,10 +85,6 @@ public class App {
 	private void viewCurrentBalance() {
 
 		// TODO Auto-generated method stub
-		// Account balance = transferService.viewCurrentBalance();
-		// TransferService transferService = new TransferService(API_BASE_URL,
-		// currentUser);
-
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
 		transferService.setAUTH_TOKEN(currentUser.getToken());
@@ -133,8 +129,12 @@ public class App {
 		Scanner scanner = new Scanner(System.in);
 		String inputUserId = scanner.nextLine();
 		int userId = Integer.parseInt(inputUserId);
+		
+		if (userId == currentUser.getUser().getId()) {
+			System.out.print("\nYou cannot send money to yourself!\n");
+		}
 
-		if (userId != 0) {
+		else if (userId != 0) {
 
 			System.out.print("Enter amount: ");
 			String inputAmount = scanner.nextLine();

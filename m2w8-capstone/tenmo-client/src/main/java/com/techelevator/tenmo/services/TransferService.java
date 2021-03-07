@@ -33,9 +33,7 @@ public class TransferService {
 		API_BASE_URL = url;
 	}
 
-	// viewCurrentBalance
-	// viewTransferHistory()
-	// sendBucks();
+
 
 	public Double viewCurrentBalance() {
 		Double account = 0.0;
@@ -96,9 +94,7 @@ public class TransferService {
       } catch (ResourceAccessException ex) {
  	    System.out.println(ex);  
    }
-	 
-	 
-	 
+ 
  }
  
  public User[] listOfUsers() {

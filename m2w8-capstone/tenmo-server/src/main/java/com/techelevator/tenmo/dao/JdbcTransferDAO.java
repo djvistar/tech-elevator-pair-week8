@@ -88,7 +88,7 @@ public class JdbcTransferDAO implements TransferDAO {
 
 			if (fromAccount.getDestinationId() == transferRequest.getDestinationId()) {
 				return "You can not send money to your self.";
-			} // getAmount() is pulling the balance due to the SQL statement above
+			} 
 			else if (fromAccount.getAmount() < transferRequest.getAmount() || fromAccount.getAmount() < 0) {
 				return "Insufficient Funds";
 			} else if (transferRequest.getAmount() < 0) {
@@ -108,9 +108,7 @@ public class JdbcTransferDAO implements TransferDAO {
 
 				String sqlFromAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
 				jdbcTemplate.update(sqlFromAccount,fromAccount.getDestinationId(), fromAccount.getReceiverId(), updatedSenderBalance, fromAccount.getDestinationId());
-				
-				//message = "You've successfully sent " + formatter.format(fromAccount.getAmount()) + " to " + toAccount.getReceiverId();
-				
+			
 			}
 		} catch (Exception ex) {
 			System.out.println(ex);
