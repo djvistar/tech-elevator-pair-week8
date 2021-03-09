@@ -7,13 +7,7 @@ import com.techelevator.tenmo.model.TransferRequest;
 
 public interface TransferDAO {
 
-	//public void sendFunds(long userId, double amount);
-	
-//	void addFundsToReceiverAccount(long receiverId, double amountSent);
-//	void removeFundsFromSenderAccount(String username, double amountSent);
-	
-	
-	List<Transfer> listOfAllTransfers();
+	 List<Transfer> listOfAllTransfers();
 	 Transfer listTransferDetails(int transferId);
 	 public String sendTransfer(TransferRequest transferRequest, int senderId);
 	

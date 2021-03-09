@@ -36,32 +36,30 @@ public class TransferController {
 	}
 	
 	@RequestMapping( path = "accounts", method = RequestMethod.GET )  
-	public double returnBalance(Principal principal) {
-		int id = userDao.findIdByUsername(principal.getName());
-		return accountDao.retrieveBalance(id);
+	public double returnBalance(Principal principal) { // Returns the balance of the current user based on login information
+		int id = userDao.findIdByUsername(principal.getName()); // Selects the id from the current user based on username
+		return accountDao.retrieveBalance(id); // Passes this information to the JDBCAccountDAO to retrieve the balance for the logged in user
 	}
 	
 	@RequestMapping( path = "allUsers", method = RequestMethod.GET)
-	public List<User> listAllUsers(){
+	public List<User> listAllUsers(){ // Returns all users of the application
 		List<User> allUsers = userDao.findAll();
 		return allUsers;
 	}
 	
 	@RequestMapping( path = "transfer", method = RequestMethod.POST )
 	public void transferFunds(@RequestBody TransferRequest toAccount, Principal principal) {
-		//transferDao.addFundsToReceiverAccount(receiverId, amountToTransfer);
-		//transferDao.removeFundsFromSenderAccount(principal.getName(), amountToTransfer);
-		int senderId = userDao.findIdByUsername(principal.getName());
-		transferDao.sendTransfer(toAccount, senderId);
+		int senderId = userDao.findIdByUsername(principal.getName()); // Selects the logged in user's Id based on the username
+		transferDao.sendTransfer(toAccount, senderId); // Passes in the current user and the userId they want to send funds to
 	}
 	
 	@RequestMapping( path = "transfers", method = RequestMethod.GET )
-	public List<Transfer> listAllTransfers() {
+	public List<Transfer> listAllTransfers() { // Lists all transfers for the logged in user
 		return transferDao.listOfAllTransfers();
 	}
 	
 	@RequestMapping( path = "transfers/{transferId}", method = RequestMethod.GET )
-	public Transfer listTransferDetails(@PathVariable int transferId) {
+	public Transfer listTransferDetails(@PathVariable int transferId) { // Lists details for the transfer selected by the user
 		return transferDao.listTransferDetails(transferId);
 	}
 	

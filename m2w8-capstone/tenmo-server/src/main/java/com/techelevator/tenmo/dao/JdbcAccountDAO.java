@@ -21,7 +21,8 @@ public class JdbcAccountDAO implements AccountDAO{
 	
 	
 	@Override
-	public double retrieveBalance(int id) {
+	public double retrieveBalance(int id) { // Calls the database to retrieve the balance listed for the current user 
+											// (based on the Principal of the logged in user passed from the controller)
 		// TODO Auto-generated method stub
 
 		double currentBalance = 0;
@@ -36,28 +37,4 @@ public class JdbcAccountDAO implements AccountDAO{
 		return currentBalance;
 	}
 	
-//	private Account mapToAccount(SqlRowSet results) {
-//		Account account = new Account();
-//		
-//		account.setAccountBalance(results.getDouble("balance"));
-//		account.setAccountId(results.getLong("account_id"));
-//		
-//		
-//		
-//		return account;
-//		
-//	}
-	
-//	private User mapToUser(SqlRowSet results) {
-//		User user = new User();
-//		
-//		user.setId(results.getLong("user_id"));
-//		user.setUsername(results.getString("username"));
-//		//user.setPassword(results.getString("password_hash"));
-//		
-//		return user;
-//	}
-	
-	
-
 }

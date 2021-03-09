@@ -35,8 +35,8 @@ public class TransferService {
 
 
 
-	public Double viewCurrentBalance() {
-		Double account = 0.0;
+	public Double viewCurrentBalance() { // Communicates with the server/controller to retrieve the current balance
+		Double account = 0.0; // If no account is found, balance will remain zero
 		try {
 			account = restTemplate.exchange(API_BASE_URL + "accounts",
 					HttpMethod.GET, makeAuthEntity(), Double.class).getBody();
@@ -48,8 +48,8 @@ public class TransferService {
 		return account;
 	}
 	
-	public Transfer[] viewTransferHistory(){
-		Transfer[] allTransfers = null;
+	public Transfer[] viewTransferHistory(){ // Communicates with the server/controller to retrieve the transfer history
+		Transfer[] allTransfers = null; // If no account is found, there is no history, so returns null
 	   
 	    try {
 	        allTransfers = restTemplate.exchange(API_BASE_URL + "transfers", HttpMethod.GET, makeAuthEntity(), Transfer[].class).getBody();
@@ -65,8 +65,8 @@ public class TransferService {
 	}
 	
 
- public Transfer viewTransferDetails(int transferId) {
-	  Transfer transferDetails = null;
+ public Transfer viewTransferDetails(int transferId) { // Communicates with server/controller to retrieve details of user-specified transfer
+	  Transfer transferDetails = null; // If no transfer is found, there are no details, so remains null
 	
   	try {
 	        transferDetails = restTemplate.exchange(API_BASE_URL + "transfers/" + transferId, HttpMethod.GET, makeAuthEntity(), Transfer.class).getBody();
@@ -79,9 +79,9 @@ public class TransferService {
  }
 	
  
- public void sendBucks(TransferRequest transferRequest) {
+ public void sendBucks(TransferRequest transferRequest) { // Initiates the transfer on the client side, passes info between Service and Controller
 	 
-	 HttpHeaders headers = new HttpHeaders();
+	 HttpHeaders headers = new HttpHeaders(); // Creates the entity specific to Object TransferRequest
 		headers.setContentType(MediaType.APPLICATION_JSON);
 		headers.setBearerAuth(AUTH_TOKEN);
 		HttpEntity<TransferRequest> entity = new HttpEntity<>(transferRequest, headers);
@@ -97,8 +97,8 @@ public class TransferService {
  
  }
  
- public User[] listOfUsers() {
-	 User[] users = null;
+ public User[] listOfUsers() { // Retrieves the list of all Tenmo users
+	 User[] users = null; // If no users are found, remains null
 	 
 	 try {
 	        users = restTemplate.exchange(API_BASE_URL + "allUsers", HttpMethod.GET, makeAuthEntity(), User[].class).getBody();

@@ -34,6 +34,7 @@ public class JdbcTransferDAO implements TransferDAO {
 
 		List<Transfer> allTransfers = new ArrayList<Transfer>();
 
+		// Selects all information from transfers table, as well as usernames of the people sending/receiving the transfer
 		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo " + "FROM transfers t "
 				+ "JOIN accounts a ON t.account_from = a.account_id "
 				+ "JOIN accounts b ON t.account_to = b.account_id " + "JOIN users u ON a.user_id = u.user_id "
@@ -41,7 +42,7 @@ public class JdbcTransferDAO implements TransferDAO {
 
 		SqlRowSet results = jdbcTemplate.queryForRowSet(sql);
 
-		while (results.next()) {
+		while (results.next()) { // Loops through the list of all results and adds them to a list
 			Transfer singleTransfer = mapToTransfer(results);
 			allTransfers.add(singleTransfer);
 		}
@@ -50,7 +51,7 @@ public class JdbcTransferDAO implements TransferDAO {
 	}
 
 	public Transfer listTransferDetails(int transferId) {
-
+		// Selects all transfer details, usernames of parties involved, and status and type descriptions for specific transfer id
 		String sql = "SELECT t.*, u.username AS userFrom, v.username AS userTo, ts.transfer_status_desc, tt.transfer_type_desc FROM transfers t "
 				+ "JOIN accounts a ON t.account_from = a.account_id "
 				+ "JOIN accounts b ON t.account_to = b.account_id " + "JOIN users u ON a.user_id = u.user_id "
@@ -60,7 +61,7 @@ public class JdbcTransferDAO implements TransferDAO {
 
 		SqlRowSet result = jdbcTemplate.queryForRowSet(sql, transferId);
 
-		result.next();
+		result.next(); // Assigns this information to a Transfer Object to be printed upon selection
 		Transfer singleTransfer = mapToTransfer(result);
 
 		return singleTransfer;
@@ -74,35 +75,42 @@ public class JdbcTransferDAO implements TransferDAO {
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 		
 		try {
+			// Retrieves the details for the sender where the user Id is gathered from the Principal of the individual logged in
 			String sqlSelectSender = "SELECT account_id, balance, user_id FROM accounts " +
 							         "WHERE user_id = ?;";
 			SqlRowSet usernameResultSender = jdbcTemplate.queryForRowSet(sqlSelectSender, senderId);
 			usernameResultSender.next();
-			TransferRequest fromAccount = mapToRequest(usernameResultSender);
-			
+			TransferRequest fromAccount = mapToRequest(usernameResultSender); // Assigns this information to the sender to be called later
+			// Retrieves the details for the reciever based on the UserId and the Amount submitted by the user
 			String sqlSelectReceiver = "SELECT account_id, balance, user_id FROM accounts " +
 					   				   "WHERE user_id = ?;";
 			SqlRowSet usernameResultReceiver = jdbcTemplate.queryForRowSet(sqlSelectReceiver, transferRequest.getReceiverId());
 			usernameResultReceiver.next();
-			TransferRequest toAccount = mapToRequest(usernameResultReceiver);
+			TransferRequest toAccount = mapToRequest(usernameResultReceiver); // Assigns this to the receiver to be called later
 
+			// If the sender of funds is equal to the receiver of funds, cannot complete transaction
 			if (fromAccount.getDestinationId() == transferRequest.getDestinationId()) {
 				return "You can not send money to your self.";
 			} 
+			// If the sender tries sending more than they have available, cannot complete transaction
 			else if (fromAccount.getAmount() < transferRequest.getAmount() || fromAccount.getAmount() < 0) {
 				return "Insufficient Funds";
-			} else if (transferRequest.getAmount() < 0) {
+			} 
+			// If the sender tries entering a negative transfer amount, cannot complete transaction
+			else if (transferRequest.getAmount() < 0) {
 				return "Cannot send negative funds";
-			} else {
+			} 
+			// Happy case comes after eliminating the possibility of all bad cases
+			else {
 				String sql = "INSERT INTO transfers(transfer_type_id, transfer_status_id, account_from, account_to, amount) "
 						+ "VALUES (2,2,?,?,?) ";
 				jdbcTemplate.update(sql, fromAccount.getDestinationId(), toAccount.getDestinationId(),
 						transferRequest.getAmount());
-				
+				// Updates the sender's account balance based on the amount entered
 				double updatedSenderBalance =fromAccount.getAmount() - transferRequest.getAmount();
-				
+				// Updates the receiver's account balance in a similar manner
 				double updatedReceiverBalance = accountDAO.retrieveBalance(toAccount.getReceiverId()) + transferRequest.getAmount();
-				
+				// Sends this information to the database
 				String sqlToAccount = "UPDATE accounts SET account_id=?, user_id = ?, balance = ? WHERE account_id = ?;";
 				jdbcTemplate.update(sqlToAccount, toAccount.getDestinationId(), toAccount.getReceiverId(), updatedReceiverBalance, toAccount.getDestinationId());
 

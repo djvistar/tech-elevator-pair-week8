@@ -85,9 +85,9 @@ public class App {
 	private void viewCurrentBalance() {
 
 		// TODO Auto-generated method stub
-		NumberFormat formatter = NumberFormat.getCurrencyInstance();
+		NumberFormat formatter = NumberFormat.getCurrencyInstance(); // Formats a double into the form of currency
 
-		transferService.setAUTH_TOKEN(currentUser.getToken());
+		transferService.setAUTH_TOKEN(currentUser.getToken()); // Communicates with the Service to set the authorization for the logged in user
 		Double balance = transferService.viewCurrentBalance();
 		System.out.println("Your current Account balance is: " + formatter.format(balance));
 
@@ -98,13 +98,13 @@ public class App {
 
 		transferService.setAUTH_TOKEN(currentUser.getToken());
 		Transfer[] allTransfers = transferService.viewTransferHistory();
-		printAllTransfers(allTransfers);
+		printAllTransfers(allTransfers); // Calls 2 private methods to print out formatted transfer data
 
 		Scanner scanner = new Scanner(System.in);
 		String input = scanner.nextLine();
-		int transferId = Integer.parseInt(input);
+		int transferId = Integer.parseInt(input); // Takes user input, sets it to an integer of the transfer to view in more detail
 		if (transferId != 0) {
-			Transfer transferDetails = transferService.viewTransferDetails(transferId);
+			Transfer transferDetails = transferService.viewTransferDetails(transferId); // If transferId is selected, calls another private method
 			printTransferDetails(transferDetails);
 		}
 
@@ -122,13 +122,13 @@ public class App {
 
 		transferService.setAUTH_TOKEN(currentUser.getToken());
 
-		User[] users = transferService.listOfUsers();
+		User[] users = transferService.listOfUsers(); // Ultimately calls the server to print all registered users of Tenmo
 		printAllUsers(users);
 
 		System.out.print("\nEnter ID of user you are sending to (0 to cancel): ");
 		Scanner scanner = new Scanner(System.in);
 		String inputUserId = scanner.nextLine();
-		int userId = Integer.parseInt(inputUserId);
+		int userId = Integer.parseInt(inputUserId); // User selects the userId of the person to send funds to
 		
 		if (userId == currentUser.getUser().getId()) {
 			System.out.print("\nYou cannot send money to yourself!\n");
@@ -142,14 +142,14 @@ public class App {
 
 			TransferRequest transferRequest = new TransferRequest();
 			transferRequest.setReceiverId(userId);
-			transferRequest.setAmount(amount);
+			transferRequest.setAmount(amount); // Sets the user input to the TransferRequest Object to be passed to the server
 
 			transferService.sendBucks(transferRequest);
 			
-			if (transferService.viewCurrentBalance() < amount) {
+			if (transferService.viewCurrentBalance() < amount) { // Cannot send more than you have available
 				System.out.println("\nInsufficient Funds");
 			} else if (amount < 0 ) {
-				System.out.println("You cannot send a negative transfer");
+				System.out.println("You cannot send a negative transfer"); // Cannot request to send a negative transfer
 			} else {
 				System.out.println(
 					"\nYou have sent " + formatter.format(amount) + " to " + transferRequest.getReceiverId() + ".");
@@ -223,26 +223,26 @@ public class App {
 		return new UserCredentials(username, password);
 	}
 
-	private void printAllTransfers(Transfer[] transfers) {
+	private void printAllTransfers(Transfer[] transfers) { // Formats all transfers into an easy to read table for the console
 
 		System.out.print(String.format("%-15s%-15s%10s\n\n", "Transfer ID", "To/From", "Amount"));
 
-		for (Transfer transfer : transfers) {
+		for (Transfer transfer : transfers) { // Loops through entire transfer table, prints each one via private method
 			printTransfer(transfer);
 		}
 		System.out.print("Please enter transfer ID to view details (0 to cancel): ");
 
 	}
 
-	private void printTransfer(Transfer transfer) {
+	private void printTransfer(Transfer transfer) { // Prints each transfer, then moves onto the next line via the for each loop in previous method
 
 		NumberFormat formatter = NumberFormat.getCurrencyInstance();
 
 		if (transfer != null) {
-			if (!transfer.getUserFrom().equalsIgnoreCase(currentUser.getUser().getUsername())) {
+			if (!transfer.getUserFrom().equalsIgnoreCase(currentUser.getUser().getUsername())) { // Selects the incoming transfers based on the current user ID
 				System.out.print(String.format("%-15s%-15s%10s\n", transfer.getTransferId(),
 						"From: " + transfer.getUserFrom(), formatter.format(transfer.getAmount())));
-			} else {
+			} else { // Selects the outgoing transfers if the first condition is not met
 				System.out.print(String.format("%-15s%-15s%10s\n", transfer.getTransferId(),
 						"To: " + transfer.getUserTo(), formatter.format(transfer.getAmount())));
 			}
